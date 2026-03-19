@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ROMAX COSMIC AI v8 - ETERNAL LEARNING</title>
+    <style>
+        :root {
+            --text-main: #0f0;
+            --text-muted: #888;
+            --accent: #ffb700; /* God-Tier Gold for V8 */
+            --danger: #ff3333;
+            --warning: #ffcc00;
+            --border: rgba(255, 183, 0, 0.3);
+            --panel-bg: rgba(10, 10, 10, 0.85);
+        }
+        
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background-color: #000; color: var(--text-main);
+            font-family: 'Courier New', Courier, monospace;
+            overflow-x: hidden;
+        }
+
+        #matrix-canvas {
+            display: block; position: fixed; top: 0; left: 0;
+            width: 100vw; height: 100vh; z-index: -1;
+        }
+
+        .container {
+            width: 100%; max-width: 900px; margin: 0 auto;
+            padding: 10px; box-sizing: border-box;
+            position: relative; z-index: 1;
+        }
+
+        .header {
+            text-align: center; border-bottom: 1px solid var(--border);
+            padding-bottom: 10px; margin-bottom: 15px;
+            background: var(--panel-bg); border-radius: 8px;
+            padding: 15px; backdrop-filter: blur(5px);
+            box-shadow: 0 0 20px rgba(255, 183, 0, 0.15);
+        }
+
+        .header h1 {
+            margin: 0; font-size: 1.7rem; color: var(--accent);
+            text-shadow: 0 0 10px var(--accent), 0 0 25px var(--accent);
+            letter-spacing: 2px;
+        }
+        
+        .v8-badge {
+            display: inline-block; background: var(--accent); color: #000;
+            padding: 3px 10px; border-radius: 4px; font-size: 0.9rem;
+            font-weight: bold; margin-bottom: 10px;
+            box-shadow: 0 0 15px var(--accent);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 10px var(--accent); }
+            50% { box-shadow: 0 0 20px var(--accent), 0 0 30px #fff; }
+            100% { box-shadow: 0 0 10px var(--accent); }
+        }
+
+        .grid {
+            display: grid; grid-template-columns: 1fr; 
+            gap: 15px; margin-bottom: 15px;
+        }
+
+        @media (min-width: 768px) {
+            .grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        .panel {
+            background-color: var(--panel-bg); backdrop-filter: blur(5px);
+            border: 1px solid var(--border); padding: 15px;
+            border-radius: 8px; box-shadow: 0 0 15px rgba(255, 183, 0, 0.1) inset;
+        }
+
+        .panel h2 {
+            margin-top: 0; font-size: 1.1rem;
+            border-bottom: 1px dashed var(--text-muted);
+            padding-bottom: 5px; color: var(--accent);
+            text-shadow: 0 0 5px var(--accent);
+            display: flex; justify-content: space-between;
+        }
+
+        .data-row {
+            display: flex; justify-content: space-between;
+            align-items: center; margin: 10px 0;
+            font-size: 1.05rem; font-weight: bold;
+        }
+
+        .data-row span:last-child {
+            text-align: right; word-break: break-all;
+            max-width: 60%; text-shadow: 0 0 5px currentColor;
+        }
+
+        .big-text {
+            font-size: 1.6rem; color: #fff;
+            text-shadow: 0 0 10px #fff, 0 0 20px var(--accent);
+        }
+
+        .terminal {
+            background-color: rgba(0, 0, 0, 0.9); border: 1px solid var(--border);
+            height: 250px; overflow-y: auto; padding: 10px;
+            font-size: 0.85rem; border-radius: 4px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,1);
+        }
+
+        .log-entry { margin-bottom: 6px; word-wrap: break-word; white-space: pre-wrap; }
+        .log-time { color: var(--text-muted); }
+        .win { color: var(--text-main); text-shadow: 0 0 5px var(--text-main); }
+        .loss { color: var(--danger); text-shadow: 0 0 5px var(--danger); }
+        .backup-hit { color: var(--warning); text-shadow: 0 0 5px var(--warning); }
+        .evolution { color: var(--accent); font-style: italic; }
+        
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #111; }
+        ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+
+        .btn-reset {
+            background: transparent; border: 1px solid var(--danger);
+            color: var(--danger); padding: 5px 10px; border-radius: 3px;
+            cursor: pointer; font-family: inherit; font-size: 0.8rem;
+        }
+        .btn-reset:hover { background: var(--danger); color: #000; }
+    </style>
+</head>
+<body>
+
+<canvas id="matrix-canvas"></canvas>
+
+<div class="container">
+    <div class="header">
+        <div class="v8-badge">V8 ETERNAL LEARNING ACTIVE</div>
+        <h1>ROMAX NEURAL GOD</h1>
+        <div id="clock" style="margin-top: 5px; color: #fff;">TIME: 00:00:00</div>
+        <small style="color: var(--accent); display: block; margin-top: 5px;" id="status-text">Synchronizing Global Memory...</small>
+    </div>
+
+    <div class="grid">
+        <div class="panel">
+            <h2>> ETERNAL TELEMETRY <button class="btn-reset" onclick="resetMemory()">WIPE MEMORY</button></h2>
+            <div class="data-row"><span>PERIOD:</span> <span id="ui-period">-----</span></div>
+            <div class="data-row"><span>LAST DRAW:</span> <span id="ui-last">-- (--)</span></div>
+            <div class="data-row"><span>LIFETIME WINS:</span> <span id="ui-wins" class="win">0</span></div>
+            <div class="data-row"><span>LIFETIME LOSSES:</span> <span id="ui-losses" class="loss">0</span></div>
+            <div class="data-row"><span>MEMORY BANK:</span> <span id="ui-memory-size" style="color: var(--accent);">0 blocks</span></div>
+        </div>
+
+        <div class="panel">
+            <h2>> WEIGHTED PREDICTION</h2>
+            <div class="data-row"><span>SIGNAL:</span> <span id="ui-pred" class="big-text">WAIT</span></div>
+            <div class="data-row"><span>CONFIDENCE:</span> <span id="ui-conf">0%</span></div>
+            <div class="data-row"><span>HEDGE:</span> <span id="ui-backup">[-]</span></div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <h2>> V8 EVOLUTION LOGS</h2>
+        <div class="terminal" id="terminal-output"></div>
+    </div>
+</div>
+
+<script>
+    // ==========================================
+    // MATRIX RAIN (Gold/Amber Theme)
+    // ==========================================
+    const canvas = document.getElementById('matrix-canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+    const alphabet = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレゲゼデベペオォコソトノホモヨョロゴゾドボポヴッンABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const fontSize = 16; const columns = canvas.width / fontSize;
+    const drops = []; for(let x = 0; x < columns; x++) drops[x] = 1;
+
+    function drawMatrix() {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#ffb700'; // Gold Matrix Rain
+        ctx.font = fontSize + 'px monospace';
+        for(let i = 0; i < drops.length; i++) {
+            const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+            ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+            if(drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+            drops[i]++;
+        }
+    }
+    window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
+    setInterval(drawMatrix, 35);
+
+    // ==========================================
+    // MATH & UTILS
+    // ==========================================
+    const getSize = (n) => n >= 5 ? "BIG" : "SMALL";
+    const sum = (arr) => arr.reduce((a,b) => a+b, 0);
+    const dot = (a, b) => a.reduce((sum, val, i) => sum + val * b[i], 0);
+    const getRandn = () => {
+        let u = 0, v = 0; while(u === 0) u = Math.random(); while(v === 0) v = Math.random();
+        return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+    };
+    function kalmanFilter(seq) {
+        const q = 0.1, r = 0.5; let x = seq[0], p = 1, out = [];
+        for (let z of seq) { p = p + q; let k = p / (p + r); x = x + k * (z - x); p = (1 - k) * p; out.push(x); }
+        return out;
+    }
+
+    // ==========================================
+    // V8 COMBINED ENGINES (v6 + v7)
+    // ==========================================
+    const EnginesV8 = {
+        dragon_v6: (history) => {
+            if (history.length < 20) return null;
+            let sizes = history.map(getSize);
+            for (let depth = 6; depth > 2; depth--) {
+                let pattern = sizes.slice(-depth); let big = 0, small = 0;
+                for (let i = 0; i < sizes.length - depth - 1; i++) {
+                    let match = true;
+                    for(let j=0; j<depth; j++) if(sizes[i+j] !== pattern[j]) match = false;
+                    if (match) { sizes[i + depth] === "BIG" ? big++ : small++; }
+                }
+                if (big > small) return "BIG";
+                if (small > big) return "SMALL";
+            }
+            return null;
+        },
+        fractal_v6: (history) => {
+            if (history.length < 30) return null;
+            let sizes = history.map(getSize);
+            for (let size = 2; size < 6; size++) {
+                let pattern = sizes.slice(-size); let matches = 0;
+                for (let i = 0; i < sizes.length - size * 2; i++) {
+                    let match = true;
+                    for(let j=0; j<size; j++) if(sizes[i+j] !== pattern[j]) match = false;
+                    if (match) matches++;
+                }
+                if (matches >= 2) return pattern[0];
+            }
+            return null;
+        },
+        markov_v7: (history) => {
+            if (history.length < 40) return null;
+            let s = history.map(getSize); let trans = {};
+            for(let i=0; i<s.length-2; i++) {
+                let key = s[i] + s[i+1];
+                if(!trans[key]) trans[key] = {BIG:0, SMALL:0};
+                trans[key][s[i+2]]++;
+            }
+            let lastKey = s[s.length-2] + s[s.length-1];
+            if(!trans[lastKey]) return null;
+            if(trans[lastKey].BIG > trans[lastKey].SMALL) return "BIG";
+            if(trans[lastKey].SMALL > trans[lastKey].BIG) return "SMALL";
+            return null;
+        },
+        neural_mlp_v7: (() => {
+            let w1 = Array.from({length: 20}, () => Array.from({length: 10}, getRandn));
+            let w2 = Array.from({length: 10}, getRandn);
+            return (history) => {
+                if (history.length < 20) return null;
+                let seq = history.slice(-20).map(x => x >= 5 ? 1 : 0);
+                seq = kalmanFilter(seq);
+                let hidden = Array(10).fill(0);
+                for(let i=0; i<10; i++) {
+                    for(let j=0; j<20; j++) hidden[i] += seq[j] * w1[j][i];
+                    hidden[i] = Math.max(0, hidden[i]); // ReLU
+                }
+                let out = dot(hidden, w2);
+                return out > 0 ? "BIG" : "SMALL";
+            }
+        })(),
+        chaos_v7: (history) => {
+            if (history.length < 40) return null;
+            let seq = history.slice(-40).map(x => x >= 5 ? 1 : 0);
+            let p = sum(seq) / seq.length;
+            let entropy = -(p * Math.log2(p + 1e-6) + (1 - p) * Math.log2(1 - p + 1e-6));
+            let volatility = Math.abs(0.5 - p) * 2;
+            let dynamicThreshold = 0.9 + (volatility * 0.05);
+            if (entropy < dynamicThreshold) return p > 0.5 ? "BIG" : "SMALL";
+            return null;
+        }
+    };
+
+    // ==========================================
+    // SYSTEM CORE & ETERNAL MEMORY
+    // ==========================================
+    const API_URL = "https://draw.ar-lottery01.com/WinGo/WinGo_30S/GetHistoryIssuePage.json";
+    
+    // Load state from local storage or initialize new
+    let state = JSON.parse(localStorage.getItem('romax_v8_state')) || {
+        historyData: [],
+        wins: 0,
+        losses: 0,
+        weights: {
+            dragon_v6: 1.0, fractal_v6: 1.0, markov_v7: 1.0, neural_mlp_v7: 1.0, chaos_v7: 1.0
+        }
+    };
+
+    let lastPeriod = null; 
+    let lastPred = null; 
+    let lastBackup = [];
+    let activePredictions = {}; // Stores what each engine predicted last round
+
+    function saveState() {
+        localStorage.setItem('romax_v8_state', JSON.stringify(state));
+        document.getElementById('ui-memory-size').innerText = `${state.historyData.length} blocks`;
+        document.getElementById('ui-wins').innerText = state.wins;
+        document.getElementById('ui-losses').innerText = state.losses;
+    }
+
+    function resetMemory() {
+        if(confirm("WARNING: This will wipe all learned neural weights and lifetime stats. Proceed?")) {
+            localStorage.removeItem('romax_v8_state');
+            location.reload();
+        }
+    }
+
+    function logTerminal(msg, type="") {
+        const t = document.getElementById("terminal-output");
+        const time = new Date().toLocaleTimeString('en-US', {hour12: false});
+        const spanClass = type ? `class="${type}"` : "";
+        t.innerHTML += `<div class="log-entry"><span class="log-time">[${time}]</span> <span ${spanClass}>${msg}</span></div>`;
+        t.scrollTop = t.scrollHeight;
+    }
+
+    function hedge(pred) {
+        let pool = pred === "BIG" ? [0, 1, 2, 3, 4] : [5, 6, 7, 8, 9];
+        return pool.sort(() => 0.5 - Math.random()).slice(0, 2);
+    }
+
+    // LEARNING MECHANISM: Reward good engines, punish bad ones
+    function evolveWeights(actualSize) {
+        let changed = false;
+        for (let [engine, pred] of Object.entries(activePredictions)) {
+            if (pred === actualSize) {
+                state.weights[engine] = Math.min(5.0, state.weights[engine] * 1.1); // Cap weight at 5.0
+                changed = true;
+            } else {
+                state.weights[engine] = Math.max(0.1, state.weights[engine] * 0.9); // Min weight 0.1
+                changed = true;
+            }
+        }
+        if(changed) logTerminal("NEURAL PATHWAYS RECALIBRATED", "evolution");
+        activePredictions = {}; // Clear for next round
+    }
+
+    function predictAll() {
+        let votes = { "BIG": 0, "SMALL": 0 };
+        let totalWeight = 0;
+
+        for (let [name, engine] of Object.entries(EnginesV8)) {
+            let p = engine(state.historyData);
+            if (p) {
+                activePredictions[name] = p; // Store what it predicted so we can grade it later
+                let w = state.weights[name] || 1.0;
+                logTerminal(`[V8] ${name} -> ${p} (Weight: ${w.toFixed(2)})`);
+                votes[p] += w;
+                totalWeight += w;
+            }
+        }
+        
+        if (totalWeight === 0) return { pred: Math.random() > 0.5 ? "BIG" : "SMALL", conf: 50 };
+
+        let finalPred = votes["BIG"] > votes["SMALL"] ? "BIG" : "SMALL";
+        let conf = Math.round((votes[finalPred] / totalWeight) * 100);
+        return { pred: finalPred, conf: Math.min(conf, 99) };
+    }
+
+    async function fetchLoop() {
+        try {
+            let response = await fetch(API_URL);
+            let data = await response.json();
+            let latest = data.data.list[0];
+            let currentPeriod = latest.issueNumber;
+            let num = parseInt(latest.number);
+
+            document.getElementById('status-text').innerText = "V8 Eternal Stream Active // Syncing...";
+
+            if (currentPeriod !== lastPeriod) {
+                // Check Win/Loss/Evolution before pushing new data
+                if (lastPred) {
+                    let actualSize = getSize(num);
+                    evolveWeights(actualSize); // THE AI LEARNS HERE
+
+                    if (actualSize === lastPred) {
+                        state.wins++; logTerminal("V8 TARGET NEUTRALIZED (WIN)", "win");
+                    } else if (lastBackup.includes(num)) {
+                        state.wins++; logTerminal("V8 HEDGE DEPLOYED (BACKUP HIT)", "backup-hit");
+                    } else {
+                        state.losses++; logTerminal("V8 PREDICTION MISMATCH (LOSS)", "loss");
+                    }
+                }
+
+                // Append memory
+                state.historyData.push(num);
+                if (state.historyData.length > 1000) state.historyData.shift(); // Keep up to 1000 draws
+                saveState();
+
+                document.getElementById('ui-period').innerText = currentPeriod;
+                document.getElementById('ui-last').innerText = `${num} (${getSize(num)})`;
+
+                logTerminal(`Processing V8 Telemetry [Period: ${currentPeriod}]`);
+                
+                let result = predictAll();
+                let backup = hedge(result.pred);
+                
+                lastPred = result.pred; lastBackup = backup; lastPeriod = currentPeriod;
+
+                document.getElementById('ui-pred').innerText = result.pred;
+                document.getElementById('ui-conf').innerText = `${result.conf}%`;
+                document.getElementById('ui-backup').innerText = `[${backup.join(", ")}]`;
+            }
+        } catch (error) {
+            document.getElementById('status-text').innerText = "ERROR: V8 Link Lost. Retrying...";
+            console.error(error);
+        }
+    }
+
+    setInterval(() => { document.getElementById('clock').innerText = "TIME: " + new Date().toLocaleTimeString('en-US', {hour12: false}); }, 1000);
+    
+    // Boot sequence
+    logTerminal("INITIALIZING V8 ETERNAL LEARNING...");
+    logTerminal(`LOADED ${state.historyData.length} BLOCKS OF PAST MEMORY...`);
+    logTerminal("AWAITING FIRST PACKET...");
+    saveState(); // Init UI numbers
+    
+    setInterval(fetchLoop, 3000);
+    fetchLoop();
+</script>
+</body>
+</html>
