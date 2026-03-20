@@ -94,7 +94,7 @@ const EnginesV8 = {
 // ==========================================
 // SYSTEM CORE & ETERNAL MEMORY
 // ==========================================
-const API_URL = "https://draw.ar-lottery01.com/WinGo/WinGo_30S/GetHistoryIssuePage.json";
+const TARGET_API = "https://draw.ar-lottery01.com/WinGo/WinGo_30S/GetHistoryIssuePage.json";
 
 let state = {
     historyData: [],
@@ -124,7 +124,7 @@ function evolveWeights(actualSize) {
             changed = true;
         }
     }
-    if(changed) console.log("=> NEURAL PATHWAYS RECALIBRATED (EVOLUTION)");
+    if(changed) console.log("=> NEURAL PATHWAYS RECALIBRATED");
     activePredictions = {}; 
 }
 
@@ -152,15 +152,17 @@ function predictAll() {
 
 async function fetchLoop() {
     try {
-        // We added fake browser headers to bypass security blocks
-        let response = await fetch(API_URL, {
+        // PROXY BOUNCE HACK
+        let timestamp = Date.now();
+        let dynamicUrl = `${TARGET_API}?t=${timestamp}`;
+        let proxyUrl = `https://corsproxy.io/?${encodeURIComponent(dynamicUrl)}`;
+
+        let response = await fetch(proxyUrl, {
             headers: {
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-                "Accept": "application/json, text/plain, */*",
-                "Accept-Language": "en-US,en;q=0.9",
-                "Referer": "https://draw.ar-lottery01.com/"
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
             }
         });
+        
         let data = await response.json();
         let latest = data.data.list[0];
         let currentPeriod = latest.issueNumber;
@@ -195,7 +197,7 @@ async function fetchLoop() {
             console.log(`>>> CURRENT RECORD: ${state.wins} Wins / ${state.losses} Losses\n`);
         }
     } catch (error) {
-        console.error("ERROR: V8 Link Lost. Retrying...", error.message);
+        console.error("ERROR: Proxy block or timeout...", error.message);
     }
 }
 
@@ -209,8 +211,8 @@ const server = http.createServer((req, res) => {
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-    console.log(`[SYSTEM] ROMAX V8 Booting...`);
+    console.log(`[SYSTEM] ROMAX V8 Booting via Proxy...`);
     console.log(`[SYSTEM] Web Server listening on port ${PORT} for Uptime Robot.`);
-    setInterval(fetchLoop, 3000);
+    setInterval(fetchLoop, 4000); // Slowed down slightly to respect proxy limits
     fetchLoop();
 });
