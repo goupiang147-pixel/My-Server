@@ -152,7 +152,15 @@ function predictAll() {
 
 async function fetchLoop() {
     try {
-        let response = await fetch(API_URL);
+        // We added fake browser headers to bypass security blocks
+        let response = await fetch(API_URL, {
+            headers: {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                "Accept": "application/json, text/plain, */*",
+                "Accept-Language": "en-US,en;q=0.9",
+                "Referer": "https://draw.ar-lottery01.com/"
+            }
+        });
         let data = await response.json();
         let latest = data.data.list[0];
         let currentPeriod = latest.issueNumber;
